@@ -70,6 +70,23 @@
   transition: none;
 }
 
+/* Fit images to the slide instead of rendering them at natural size (which
+   overflows off-screen in the fork). Classic notebook's rendered_html uses
+   max-width:100%; height:auto; and centers block images. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon img,
+.rise-enabled .reveal .jp-RenderedImage img,
+.rise-enabled .reveal section img {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+}
+
+.rise-enabled .reveal .jp-RenderedHTMLCommon img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .rise-enabled .reveal a {
   color: #2980b9;
 }
@@ -79,7 +96,9 @@
 }
 
 .rise-enabled .reveal .slides {
-  width: 100% !important;
+  /* No `width: 100% !important` here (unlike upstream): forcing full width made
+     reveal ignore its `margin: 0.1`, so content ran edge-to-edge and images
+     overflowed. Classic RISE has no such override — let reveal inset the slides. */
   transition-property: all;
   transition-duration: 0.2s;
   transition-timing-function: ease;
@@ -203,6 +222,20 @@
   line-height: 160%;
 }
 
+/* Hide the JupyterLab cell collapser: when a cell is active/selected it shows a
+   brand-color (blue) left bar, which leaks through as a stray vertical blue bar
+   on the left edge of the slide. Classic RISE has no such chrome. */
+.rise-enabled .jp-Collapser {
+  display: none;
+}
+
+/* Kill the active/selected-cell blue side border JupyterLab draws. */
+.rise-enabled .jp-Cell.jp-mod-active .jp-InputArea,
+.rise-enabled .jp-Cell.jp-mod-selected {
+  box-shadow: none;
+  border-color: transparent;
+}
+
 .rise-enabled .jp-InputArea pre {
   font-size: 14px;
 }
@@ -251,26 +284,79 @@
   overflow-y: hidden;
 }
 
-.rise-enabled .jp-RenderedHTMLCommon h1 {
-  font-weight: bold;
+/* Headings: restore the classic Notebook `rendered_html` typography that RISE
+   relied on (large, bold, black). Without this, JupyterLab's jp-RenderedHTMLCommon
+   renders headings small and grey (via --jp-content-font-color*), which looks
+   nothing like classic RISE. Percentages copied from nbclassic's rendered_html. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon {
+  color: #000;
+  text-align: left;
+
+  /* JupyterLab resets rendered markdown to an absolute --jp-content-font-size1
+     (14px), which discards RISE's inherited slide scaling and makes all text and
+     headings ~2.5x too small. Classic RISE's rendered_html sits at 160% of the
+     22.4px slides font = 35.84px; restore that so headings/body match. */
+  font-size: 35.84px;
 }
 
-.rise-enabled .jp-RenderedHTMLCommon h2 {
+.rise-enabled .reveal .jp-RenderedHTMLCommon h1 {
+  font-size: 185.7%;
   font-weight: bold;
+  line-height: 1;
+  color: #000;
+  margin: 1.08em 0 0;
 }
 
-.rise-enabled .jp-RenderedHTMLCommon h3 {
+.rise-enabled .reveal .jp-RenderedHTMLCommon h2 {
+  font-size: 157.1%;
   font-weight: bold;
+  line-height: 1;
+  color: #000;
+  margin: 1.27em 0 0;
 }
 
-.rise-enabled .jp-RenderedHTMLCommon h4 {
+.rise-enabled .reveal .jp-RenderedHTMLCommon h3 {
+  font-size: 128.6%;
+  font-weight: bold;
+  line-height: 1;
+  color: #000;
+  margin: 1.55em 0 0;
+}
+
+.rise-enabled .reveal .jp-RenderedHTMLCommon h4 {
+  font-size: 100%;
+  font-weight: bold;
+  line-height: 1;
+  color: #000;
+  margin: 2em 0 0;
+}
+
+.rise-enabled .reveal .jp-RenderedHTMLCommon h5 {
+  font-size: 100%;
   font-weight: bold;
   font-style: italic;
+  line-height: 1;
+  color: #000;
+  margin: 2em 0 0;
 }
 
-.rise-enabled .jp-RenderedHTMLCommon h5 {
+.rise-enabled .reveal .jp-RenderedHTMLCommon h6 {
+  font-size: 100%;
   font-weight: bold;
   font-style: italic;
+  line-height: 1;
+  color: #000;
+  margin: 2em 0 0;
+}
+
+/* First heading in a cell should not push a big top margin (classic uses ~0.5em). */
+.rise-enabled .reveal .jp-RenderedHTMLCommon h1:first-child,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h2:first-child,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h3:first-child,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h4:first-child,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h5:first-child,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h6:first-child {
+  margin-top: 0.5em;
 }
 
 .rise-enabled .CodeMirror {
