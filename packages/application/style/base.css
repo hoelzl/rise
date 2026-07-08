@@ -38,6 +38,17 @@
   border-bottom: none;
 }
 
+/* JupyterLab's jp-RenderedHTMLCommon pins an absolute font-size on the <table>
+   element (via --jp-content-font-size1, ~14px), which overrides the 35.84px
+   slide scaling we set on .jp-RenderedHTMLCommon above and renders tables ~2.5x
+   too small. Reset it to inherit so tables match the surrounding slide text, and
+   give the table classic vertical breathing room from the preceding heading. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon table {
+  font-size: inherit;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 /* do not apply this on the <body> tag */
 :not(body).rise-enabled {
   background-color: #fff;
