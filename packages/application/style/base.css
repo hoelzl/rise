@@ -236,26 +236,27 @@
   border-color: transparent;
 }
 
-/* Code cells: classic RISE renders code at 32.256px (90% of the 35.84px content
-   font). JupyterLab's CodeMirror 6 instead pins an absolute --jp-code-font-size
-   (13px), so code appears tiny — the same reset problem as markdown. Target the
-   CM6 editor (.cm-editor/.cm-content) plus the legacy `pre`/CodeMirror selectors
-   so it works regardless of editor version, and match prompts + outputs. */
+/* Code cells: classic RISE renders code at the 22.4px slides base font (unlike
+   markdown, code does NOT get rendered_html's extra 1.6x). JupyterLab's
+   CodeMirror 6 instead pins an absolute --jp-code-font-size (13px), so code
+   appears ~1.7x too small. Target the CM6 editor (.cm-editor/.cm-content) plus
+   the legacy `pre`/CodeMirror selectors so it works regardless of editor
+   version, and match prompts + outputs. */
 .rise-enabled .reveal .jp-InputArea-editor,
 .rise-enabled .reveal .jp-InputArea-editor .cm-editor,
 .rise-enabled .reveal .jp-InputArea-editor .cm-content,
 .rise-enabled .reveal .jp-Cell .CodeMirror,
 .rise-enabled .reveal .jp-InputArea pre {
-  font-size: 32.256px;
+  font-size: 22.4px;
 }
 
 .rise-enabled .reveal .jp-InputPrompt,
 .rise-enabled .reveal .jp-OutputPrompt {
-  font-size: 32.256px;
+  font-size: 22.4px;
 
-  /* Widen the prompt gutter so the enlarged `[ ]:` isn't truncated to an ellipsis,
-     and so code starts indented like classic RISE (which shows a full `In [ ]:`). */
-  min-width: 130px;
+  /* Widen the prompt gutter so the `[ ]:` isn't truncated to an ellipsis, and so
+     code starts indented like classic RISE (which shows a full `In [ ]:`). */
+  min-width: 105px;
   overflow: visible;
   text-overflow: clip;
   transition-property: all;
@@ -266,7 +267,7 @@
 .rise-enabled .reveal .jp-OutputArea pre,
 .rise-enabled .reveal .jp-RenderedText pre,
 .rise-enabled .reveal .jp-OutputArea .cm-content {
-  font-size: 32.256px;
+  font-size: 22.4px;
 }
 
 .rise-enabled .jp-OutputPrompt {
