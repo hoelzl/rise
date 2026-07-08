@@ -445,6 +445,23 @@
   display: inherit;
 }
 
+/* Blockquotes: classic RISE gets its blockquote look from the reveal `simple`
+   theme (a centered 70%-wide italic box with a subtle full box-shadow border).
+   The fork doesn't load a reveal theme, so JupyterLab's own blockquote styling
+   (a grey `border-left: 5px solid` bar) shows through instead. Restore the
+   classic simple-theme blockquote and override jp's left bar/padding. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon blockquote {
+  display: block;
+  position: relative;
+  width: 70%;
+  margin: 20px auto;
+  padding: 5px;
+  font-style: italic;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 2px rgb(0 0 0 / 20%);
+  border-left: 0;
+}
+
 /* TODO */
 .rise-enabled .jp-Dialog-body kbd {
   padding: 0.1em 0.6em;
