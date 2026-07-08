@@ -87,11 +87,14 @@
   margin-right: auto;
 }
 
-/* Tables: classic rendered_html tables inherit the 35.84px slide body font and
-   center horizontally. JupyterLab instead pins an absolute --jp-content-font-size1
-   (14px) on the table, so tables render tiny (same absolute-reset problem as
-   markdown/code). Restore inherited sizing + classic centering. */
-.rise-enabled .reveal .jp-RenderedHTMLCommon table {
+/* Markdown tables: classic rendered_html tables inherit the 35.84px slide body
+   font and center horizontally. JupyterLab instead pins an absolute
+   --jp-content-font-size1 (14px) on the table, so tables render tiny (same
+   absolute-reset problem as markdown/code). Restore inherited sizing + classic
+   centering — but scope to MARKDOWN cells (.jp-RenderedMarkdown): code-cell
+   OUTPUT tables (e.g. pandas DataFrames, .jp-OutputArea) are rendered small in
+   classic and must keep JupyterLab's default output-table sizing. */
+.rise-enabled .reveal .jp-RenderedMarkdown table {
   font-size: inherit;
   margin-left: auto;
   margin-right: auto;
