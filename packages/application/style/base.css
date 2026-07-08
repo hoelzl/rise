@@ -236,21 +236,37 @@
   border-color: transparent;
 }
 
-.rise-enabled .jp-InputArea pre {
-  font-size: 14px;
+/* Code cells: classic RISE renders code at 32.256px (90% of the 35.84px content
+   font). JupyterLab's CodeMirror 6 instead pins an absolute --jp-code-font-size
+   (13px), so code appears tiny — the same reset problem as markdown. Target the
+   CM6 editor (.cm-editor/.cm-content) plus the legacy `pre`/CodeMirror selectors
+   so it works regardless of editor version, and match prompts + outputs. */
+.rise-enabled .reveal .jp-InputArea-editor,
+.rise-enabled .reveal .jp-InputArea-editor .cm-editor,
+.rise-enabled .reveal .jp-InputArea-editor .cm-content,
+.rise-enabled .reveal .jp-Cell .CodeMirror,
+.rise-enabled .reveal .jp-InputArea pre {
+  font-size: 32.256px;
 }
 
-.rise-enabled .jp-InputPrompt {
-  font-size: 0.9rem;
+.rise-enabled .reveal .jp-InputPrompt,
+.rise-enabled .reveal .jp-OutputPrompt {
+  font-size: 32.256px;
+
+  /* Widen the prompt gutter so the enlarged `[ ]:` isn't truncated to an ellipsis,
+     and so code starts indented like classic RISE (which shows a full `In [ ]:`). */
+  min-width: 130px;
+  overflow: visible;
+  text-overflow: clip;
   transition-property: all;
   transition-duration: 0.2s;
   transition-timing-function: ease;
-
-  /* font-size: 90%; */
 }
 
-.rise-enabled .jp-OutputArea pre {
-  font-size: 14px;
+.rise-enabled .reveal .jp-OutputArea pre,
+.rise-enabled .reveal .jp-RenderedText pre,
+.rise-enabled .reveal .jp-OutputArea .cm-content {
+  font-size: 32.256px;
 }
 
 .rise-enabled .jp-OutputPrompt {
