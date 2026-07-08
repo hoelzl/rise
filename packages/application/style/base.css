@@ -38,17 +38,6 @@
   border-bottom: none;
 }
 
-/* JupyterLab's jp-RenderedHTMLCommon pins an absolute font-size on the <table>
-   element (via --jp-content-font-size1, ~14px), which overrides the 35.84px
-   slide scaling we set on .jp-RenderedHTMLCommon above and renders tables ~2.5x
-   too small. Reset it to inherit so tables match the surrounding slide text, and
-   give the table classic vertical breathing room from the preceding heading. */
-.rise-enabled .reveal .jp-RenderedHTMLCommon table {
-  font-size: inherit;
-  margin-top: 0.5em;
-  margin-bottom: 0.5em;
-}
-
 /* do not apply this on the <body> tag */
 :not(body).rise-enabled {
   background-color: #fff;
@@ -94,6 +83,16 @@
 
 .rise-enabled .reveal .jp-RenderedHTMLCommon img {
   display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Tables: classic rendered_html tables inherit the 35.84px slide body font and
+   center horizontally. JupyterLab instead pins an absolute --jp-content-font-size1
+   (14px) on the table, so tables render tiny (same absolute-reset problem as
+   markdown/code). Restore inherited sizing + classic centering. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon table {
+  font-size: inherit;
   margin-left: auto;
   margin-right: auto;
 }
@@ -385,6 +384,42 @@
 .rise-enabled .reveal .jp-RenderedHTMLCommon h5:first-child,
 .rise-enabled .reveal .jp-RenderedHTMLCommon h6:first-child {
   margin-top: 0.5em;
+}
+
+/* Block spacing: reproduce classic Notebook's rendered_html rhythm exactly.
+   Classic spaces sibling blocks with a 1em *top* margin on the *following*
+   element (`.rendered_html * + ul/ol/p/table { margin-top: 1em }`) and gives
+   blocks (incl. headings) no bottom margin. The fork instead inherits a tangle
+   of JupyterLab `margin-bottom` rules plus reveal-theme list margins, which
+   leaves several adjacencies with the WRONG gap — most visibly zero gap after a
+   heading (heading→list/para/table) and zero gap between two sibling lists
+   (list→list), and an inconsistent trailing margin below the last block. Zero
+   the bottom margins and drive all spacing from classic's top-margin rules so
+   every adjacency matches classic. Nested lists get no extra top gap. */
+.rise-enabled .reveal .jp-RenderedHTMLCommon p,
+.rise-enabled .reveal .jp-RenderedHTMLCommon ul,
+.rise-enabled .reveal .jp-RenderedHTMLCommon ol,
+.rise-enabled .reveal .jp-RenderedHTMLCommon table {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.rise-enabled .reveal .jp-RenderedHTMLCommon * + p,
+.rise-enabled .reveal .jp-RenderedHTMLCommon * + ul,
+.rise-enabled .reveal .jp-RenderedHTMLCommon * + ol,
+.rise-enabled .reveal .jp-RenderedHTMLCommon * + table,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h1 + *,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h2 + *,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h3 + *,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h4 + *,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h5 + *,
+.rise-enabled .reveal .jp-RenderedHTMLCommon h6 + * {
+  margin-top: 1em;
+}
+.rise-enabled .reveal .jp-RenderedHTMLCommon ul ul,
+.rise-enabled .reveal .jp-RenderedHTMLCommon ul ol,
+.rise-enabled .reveal .jp-RenderedHTMLCommon ol ul,
+.rise-enabled .reveal .jp-RenderedHTMLCommon ol ol {
+  margin-top: 0;
 }
 
 .rise-enabled .CodeMirror {
