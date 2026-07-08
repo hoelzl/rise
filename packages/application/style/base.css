@@ -207,6 +207,36 @@
   padding-top: 0;
 }
 
+/* Full-screen slideshow background. RISE full-screen requests fullscreen on the
+   `.reveal` element itself, but reveal.js 4 paints the deck background colour on
+   `.reveal-viewport` (the body), NOT on `.reveal`. So the fullscreened `.reveal`
+   is transparent and the browser paints a black `::backdrop` behind it, which
+   shows through the reveal margin (0.1) as black bars around the white slide.
+   Classic RISE keeps these margins the theme background (white). Paint `.reveal`
+   (and its backdrop) with reveal's own background colour so full-screen matches
+   the windowed look and classic RISE. No-op windowed (the white body is behind
+   the transparent `.reveal` already). */
+.rise-enabled .reveal,
+.rise-enabled .reveal::backdrop {
+  background-color: var(--r-background-color, #fff);
+}
+
+/* Hide JupyterLab's notebook scrollbar in slideshow mode. `.jp-Notebook` keeps a
+   `.jp-WindowedPanel-outer` (overflow:auto) scroll container even with
+   windowingMode:'none'; its content can sit a hair taller than the viewport,
+   which paints a stray grey vertical scrollbar over the slide. We hide the
+   scrollbar visually WITHOUT disabling scroll (tall voiceover slides still need
+   to scroll — overflow:hidden here clips them). With the bar at zero width it
+   also stops stealing layout width, which broke a feedback loop where the
+   ready-handler ResizeObserver kept re-running Reveal.layout() and the bar
+   drifted on every slide change and never settled. */
+.rise-enabled .jp-WindowedPanel-outer {
+  scrollbar-width: none; /* Firefox */
+}
+.rise-enabled .jp-WindowedPanel-outer::-webkit-scrollbar {
+  display: none; /* Chromium/WebKit */
+}
+
 .rise-enabled .jp-Notebook {
   transition-property: all;
   transition-duration: 0.2s;

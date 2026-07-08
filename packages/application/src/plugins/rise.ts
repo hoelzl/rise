@@ -1068,6 +1068,21 @@ namespace Rise {
       // check and set the scrolling slide when you start the whole thing
       setScrollingSlide();
       autoSelectHook(panel.content);
+      // The notebook panel is often still growing to fill the slideshow shell
+      // area when reveal.js first lays out, so the deck gets sized for a narrow
+      // (portrait) container and only snaps to landscape on the first slide
+      // change (which internally re-layouts). Force a re-layout once the
+      // container has settled, and again whenever it resizes, so the very first
+      // slide is already correctly sized. Reveal.layout() is cheap + idempotent.
+      requestAnimationFrame(() => Reveal.layout());
+      setTimeout(() => Reveal.layout(), 250);
+      try {
+        const ro = new ResizeObserver(() => Reveal.layout());
+        ro.observe(panel.node);
+      } catch (e) {
+        // ResizeObserver unavailable: the delayed layout calls above still cover
+        // the common case.
+      }
     });
 
     Reveal.addEventListener('slidechanged', event => {
