@@ -178,6 +178,11 @@ module.exports = [
         name: ['_JUPYTERLAB', 'CORE_OUTPUT']
       },
       filename: 'bundle.js',
+      // The static files are served with a one-year immutable cache, so
+      // chunk names must change with their content (bundle.js itself gets a
+      // ?v= content hash from the page template).
+      chunkFilename: '[name].[contenthash].bundle.js',
+      clean: true,
       sourceMapFilename: '[name].js.map'
     },
     devtool: 'source-map',

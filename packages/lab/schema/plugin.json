@@ -21,9 +21,14 @@
   },
   "jupyter.lab.shortcuts": [
     {
-      "command": "RISE:preview",
+      "command": "RISE:toggle",
       "keys": ["Alt R"],
-      "selector": ".jp-Notebook:focus"
+      "selector": ".jp-Notebook"
+    },
+    {
+      "command": "RISE:toggle",
+      "keys": ["Alt R"],
+      "selector": ".jp-RisePreview"
     },
     {
       "command": "RISE:set-slide-type",
@@ -67,6 +72,11 @@
       "command": "RISE:fullscreenHelp",
       "keys": ["F"],
       "selector": ".lm-Widget.reveal .jp-Notebook:focus"
+    },
+    {
+      "command": "RISE:fullscreenHelp",
+      "keys": ["F"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-commandMode :focus"
     },
     {
       "command": "RISE:riseHelp",
@@ -117,6 +127,26 @@
       "command": "RISE:smart-exec",
       "keys": ["Shift Enter"],
       "selector": ".lm-Widget.reveal .jp-Notebook:focus"
+    },
+    {
+      "command": "RISE:smart-exec",
+      "keys": ["Shift Enter"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-commandMode :focus"
+    },
+    {
+      "command": "RISE:smart-exec",
+      "keys": ["Shift Enter"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "RISE:smart-exec",
+      "keys": ["Alt Enter"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-commandMode :focus"
+    },
+    {
+      "command": "RISE:smart-exec",
+      "keys": ["Alt Enter"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-editMode"
     }
   ],
   "type": "object",
