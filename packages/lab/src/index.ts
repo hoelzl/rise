@@ -50,6 +50,10 @@ namespace CommandIDs {
    */
   export const risePreview = 'RISE:preview';
   /**
+   * Close the slideshow of the current notebook, or open one
+   */
+  export const riseToggle = 'RISE:toggle';
+  /**
    * Set the slide attribute of a cell
    */
   export const riseSetSlideType = 'RISE:set-slide-type';
@@ -148,11 +152,29 @@ const plugin: JupyterFrontEndPlugin<IRisePreviewTracker> = {
       );
     }
 
+    /**
+     * Leave a slideshow: close it and go back to its notebook. In Jupyter
+     * Notebook the slideshow has a browser tab of its own, which is closed too.
+     */
+    function closePreview(preview: RisePreview): void {
+      const path = preview.context.path;
+      preview.close();
+      const notebook = notebookTracker?.find(
+        panel => panel.context.path === path
+      );
+      if (notebook) {
+        shell.activateById(notebook.id);
+      } else if (toArray(shell.widgets('main')).length === 0) {
+        window.close();
+      }
+    }
+
     factory.widgetCreated.connect((sender, widget) => {
       // Notify the widget tracker if restore data needs to update.
       widget.context.pathChanged.connect(() => {
         void tracker.save(widget);
       });
+      widget.exitRequested.connect(() => closePreview(widget));
       // Add the notebook panel to the tracker.
       void tracker.add(widget);
     });
@@ -238,6 +260,33 @@ const plugin: JupyterFrontEndPlugin<IRisePreviewTracker> = {
         }
       },
       isEnabled
+    });
+
+    commands.addCommand(CommandIDs.riseToggle, {
+      label: trans.__('Toggle Reveal Slideshow'),
+      caption: trans.__(
+        'Close the slideshow of the current notebook, or open one'
+      ),
+      execute: async args => {
+        const current = shell.currentWidget;
+        if (current && tracker.has(current)) {
+          closePreview(current as RisePreview);
+          return;
+        }
+        const path = notebookTracker.currentWidget?.context.path;
+        const open = tracker.find(preview => preview.context.path === path);
+        if (open) {
+          closePreview(open);
+          return;
+        }
+        await commands.execute(CommandIDs.risePreview, args);
+      },
+      // The slideshow app bundles this plugin too; there, Alt+R is handled
+      // by the host page (see RisePreview).
+      isEnabled: () =>
+        app.name !== 'Rise' &&
+        (isEnabled() ||
+          (!!shell.currentWidget && tracker.has(shell.currentWidget)))
     });
 
     commands.addCommand(CommandIDs.riseFullScreen, {

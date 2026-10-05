@@ -1,4 +1,6 @@
+import hashlib
 import os
+from functools import lru_cache
 from os.path import join as pjoin
 from pathlib import Path
 from typing import Optional
@@ -22,6 +24,21 @@ HERE = os.path.dirname(__file__)
 
 app_dir = get_app_dir()
 version = __version__
+
+
+@lru_cache(maxsize=1)
+def bundle_hash() -> str:
+    """Content hash of static/bundle.js, for cache busting.
+
+    The static files are served with a one-year immutable cache, but the entry
+    bundle keeps its name across builds; without a changing ?v= the browser
+    would keep running an old slideshow app after an upgrade.
+    """
+    try:
+        with open(pjoin(HERE, "static", "bundle.js"), "rb") as f:
+            return hashlib.sha256(f.read()).hexdigest()[:16]
+    except OSError:
+        return version
 
 
 class RiseHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHandler):
@@ -87,6 +104,7 @@ class RiseHandler(ExtensionHandlerJinjaMixin, ExtensionHandlerMixin, JupyterHand
                 "index.html",
                 static=self.static_url,
                 base_url=self.base_url,
+                bundle_hash=bundle_hash(),
                 token=self.settings["token"],
                 page_config=self.get_page_config(path),
             )

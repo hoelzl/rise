@@ -54,6 +54,19 @@ export class RisePreview extends DocumentWidget<IFrame, INotebookModel> {
     //Private.setupLog();
 
     this._ready = new PromiseDelegate<void>();
+    this.addClass('jp-RisePreview');
+
+    // The slideshow runs in an iframe, so the host app's shortcuts never see
+    // its key presses. Hook Alt+R in there (again after every reload) so it
+    // leaves the slideshow, like it does in classic RISE.
+    const iframe = this.iframe;
+    iframe?.addEventListener('load', () => {
+      iframe.contentWindow?.addEventListener(
+        'keydown',
+        this._onIFrameKeydown,
+        true
+      );
+    });
 
     const { getRiseUrl, context, renderOnSave, translator } = options;
     this.getRiseUrl = getRiseUrl;
@@ -125,6 +138,13 @@ export class RisePreview extends DocumentWidget<IFrame, INotebookModel> {
 
   get iframe(): HTMLIFrameElement | null {
     return this.content.node.querySelector('iframe');
+  }
+
+  /**
+   * Signal emitted when Alt+R is pressed inside the slideshow.
+   */
+  get exitRequested(): ISignal<RisePreview, void> {
+    return this._exitRequested;
   }
 
   /**
@@ -207,7 +227,22 @@ export class RisePreview extends DocumentWidget<IFrame, INotebookModel> {
     return ready.promise;
   }
 
+  private _onIFrameKeydown = (event: KeyboardEvent): void => {
+    if (
+      event.code === 'KeyR' &&
+      event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.shiftKey
+    ) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      this._exitRequested.emit();
+    }
+  };
+
   protected getRiseUrl: (path: string, index?: number) => string;
+  private _exitRequested = new Signal<RisePreview, void>(this);
   private _ready: PromiseDelegate<void>;
   private _renderOnSave: boolean;
   private _path: string;

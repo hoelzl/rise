@@ -297,26 +297,52 @@ namespace Rise {
   }
 
   /* Register commands */
+
+  /* Index of the cell smart exec should select after running the selected
+   * cells, or null to stay put. Like classic RISE: advance only when the next
+   * shown cell is already visible on the current (sub)slide. Selecting a cell
+   * on the next (sub)slide makes reveal jump there (see the activeCellChanged
+   * handler in Revealer), hiding the output just produced.
+   */
+  function smartExecTarget(notebook: Notebook): number | null {
+    const cells = notebook.model?.cells;
+    if (!cells) {
+      return null;
+    }
+    let last = notebook.activeCellIndex;
+    notebook.widgets.forEach((cell, index) => {
+      if (notebook.isSelectedOrActive(cell)) {
+        last = Math.max(last, index);
+      }
+    });
+    for (let index = last + 1; index < cells.length; index++) {
+      const cell = cells.get(index);
+      if (is_skip(cell) || is_notes(cell)) {
+        continue;
+      }
+      if (is_slide(cell) || is_subslide(cell)) {
+        return null;
+      }
+      if (is_fragment(cell)) {
+        const fragment = notebook.widgets[index].node.closest('.fragment');
+        if (fragment && !fragment.classList.contains('visible')) {
+          return null;
+        }
+      }
+      return index;
+    }
+    // Never advance past the last cell: runAndAdvance would insert a new cell
+    // there, which breaks the slide layout and gets autosaved.
+    return null;
+  }
+
   function smartExec(panel: NotebookPanel) {
-    NotebookActions.runAndAdvance(panel.content, panel.context.sessionContext);
-    // TODO
-    // is it really the selected cell that matters ?
-    // let smart_exec = Jupyter.notebook.get_selected_cell().smart_exec;
-    // if (smart_exec == 'smart_exec_slide') {
-    //   Jupyter.notebook.execute_selected_cells();
-    // } else if (smart_exec == "smart_exec_fragment") {
-    //   // let's see if the next fragment is visible or not
-    //   let cell = Jupyter.notebook.get_selected_cell();
-    //   let fragment_div = cell.smart_exec_next_fragment;
-    //   let visible = $(fragment_div).hasClass('visible');
-    //   if (visible) {
-    //     Jupyter.notebook.execute_cell_and_select_below();
-    //   } else {
-    //     Jupyter.notebook.execute_selected_cells();
-    //   }
-    // } else {
-    //   Jupyter.notebook.execute_cell_and_select_below();
-    // }
+    const notebook = panel.content;
+    const target = smartExecTarget(notebook);
+    void NotebookActions.run(notebook, panel.context.sessionContext);
+    if (target !== null) {
+      notebook.activeCellIndex = target;
+    }
   }
 
   export function registerCommands(
@@ -1142,6 +1168,41 @@ namespace Rise {
     Revealer(panel, selected_slide);
     // Minor modifications for usability
     addHelpButton(panel, commands, trans);
+    warnOnStructureChange(notebook, trans);
+  }
+
+  /* markupSlides moved every cell node out of the notebook's viewport into
+   * reveal <section>s. Adding, removing or moving a cell now makes JupyterLab
+   * re-attach cell nodes outside the slides (the deck looks like two
+   * notebooks on top of each other), and autosave writes the changed cell
+   * order to disk. Nothing in a slideshow should do that, so say so loudly.
+   */
+  function warnOnStructureChange(
+    notebook: Notebook,
+    trans: TranslationBundle
+  ): void {
+    let warned = false;
+    notebook.model?.cells.changed.connect((_, change) => {
+      if (change.type === 'set') {
+        return;
+      }
+      console.warn(
+        `RISE: cell ${change.type} during the slideshow`,
+        change,
+        new Error().stack
+      );
+      if (warned) {
+        return;
+      }
+      warned = true;
+      void showDialog({
+        title: trans.__('Notebook structure changed'),
+        body: trans.__(
+          'A cell was added, removed or moved during the slideshow, so the slides no longer match the notebook. Close the slideshow and check the notebook before it is saved. Details are in the browser console.'
+        ),
+        buttons: [Dialog.warnButton({ label: trans.__('OK') })]
+      });
+    });
   }
 
   async function displayRiseHelp(
