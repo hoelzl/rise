@@ -33,6 +33,8 @@ namespace CommandIDs {
   export const riseSmartExec = 'RISE:smart-exec';
   export const riseFirstSlide = 'RISE:firstSlide';
   export const riseLastSlide = 'RISE:lastSlide';
+  export const riseNextSlide = 'RISE:nextSlide';
+  export const risePreviousSlide = 'RISE:previousSlide';
   export const riseToggleOverview = 'RISE:toggleOverview';
   export const riseToggleAllButtons = 'RISE:toggleAllRiseButtons';
   export const riseFullScreen = 'RISE:fullscreenHelp';
@@ -110,6 +112,8 @@ export const plugin: JupyterFrontEndPlugin<void> = {
           CommandIDs.riseNotesOpen,
           CommandIDs.riseFirstSlide,
           CommandIDs.riseLastSlide,
+          CommandIDs.riseNextSlide,
+          CommandIDs.risePreviousSlide,
           CommandIDs.riseShowConfig,
           CommandIDs.riseChalkboardToggle,
           CommandIDs.riseChalkboardClear,
@@ -378,6 +382,10 @@ namespace Rise {
     reveal_actions[CommandIDs.riseFirstSlide] = () => Reveal.slide(0); // jump to first slide
     reveal_actions[CommandIDs.riseLastSlide] = () =>
       Reveal.slide(Number.MAX_VALUE); // jump to last slide
+    // Same as Space / Shift Space; bound to Ctrl Shift ArrowDown / ArrowUp,
+    // next/previous slide in other slide viewers (and move cell in the notebook).
+    reveal_actions[CommandIDs.riseNextSlide] = () => Reveal.next();
+    reveal_actions[CommandIDs.risePreviousSlide] = () => Reveal.prev();
     reveal_actions[CommandIDs.riseToggleOverview] = () =>
       Reveal.toggleOverview(); // toggle overview
     reveal_actions[CommandIDs.riseToggleAllButtons] = toggleAllRiseButtons; // show/hide buttons
@@ -1168,7 +1176,65 @@ namespace Rise {
     Revealer(panel, selected_slide);
     // Minor modifications for usability
     addHelpButton(panel, commands, trans);
+    blockStructureCommands(commands);
     warnOnStructureChange(notebook, trans);
+  }
+
+  /* Notebook commands that add, remove or move cells (changing the cell type
+   * replaces the cell). See warnOnStructureChange for why the slideshow must
+   * not run them.
+   */
+  const STRUCTURE_COMMANDS = new Set([
+    'notebook:insert-cell-above',
+    'notebook:insert-cell-below',
+    'notebook:insert-heading-above',
+    'notebook:insert-heading-below',
+    'notebook:delete-cell',
+    'notebook:cut-cell',
+    'notebook:paste-cell-above',
+    'notebook:paste-cell-below',
+    'notebook:paste-and-replace-cell',
+    'notebook:duplicate-below',
+    'notebook:move-cell-up',
+    'notebook:move-cell-down',
+    'notebook:merge-cells',
+    'notebook:merge-cell-above',
+    'notebook:merge-cell-below',
+    'notebook:split-cell-at-cursor',
+    'notebook:change-cell-to-code',
+    'notebook:change-cell-to-markdown',
+    'notebook:change-cell-to-raw',
+    'notebook:change-cell-to-heading-1',
+    'notebook:change-cell-to-heading-2',
+    'notebook:change-cell-to-heading-3',
+    'notebook:change-cell-to-heading-4',
+    'notebook:change-cell-to-heading-5',
+    'notebook:change-cell-to-heading-6'
+  ]);
+
+  /* Run commands that insert a cell after the last one; smart exec runs the
+   * cell without inserting.
+   */
+  const RUN_COMMANDS = new Set([
+    'notebook:run-cell-and-select-next',
+    'notebook:run-cell-and-insert-below'
+  ]);
+
+  /* This app only shows the slideshow, so refuse the structure commands
+   * however they are invoked (default or custom shortcut, palette, menu).
+   */
+  function blockStructureCommands(commands: CommandRegistry): void {
+    const execute = commands.execute.bind(commands);
+    commands.execute = (id, args) => {
+      if (STRUCTURE_COMMANDS.has(id)) {
+        console.info(`RISE: ${id} is disabled during the slideshow`);
+        return Promise.resolve();
+      }
+      if (RUN_COMMANDS.has(id)) {
+        return execute(CommandIDs.riseSmartExec);
+      }
+      return execute(id, args);
+    };
   }
 
   /* markupSlides moved every cell node out of the notebook's viewport into
@@ -1243,6 +1309,8 @@ namespace Rise {
     <li><kbd>${CommandRegistry.formatKeystroke(
       'Shift Enter'
     )}</kbd>: ${trans.__('eval and select next cell if visible')}</li>
+    ${helpListItem(CommandIDs.riseNextSlide)}
+    ${helpListItem(CommandIDs.risePreviousSlide)}
     ${helpListItem(CommandIDs.riseFirstSlide)}
     ${helpListItem(CommandIDs.riseLastSlide)}
     ${helpListItem(CommandIDs.riseToggleOverview)}
@@ -1324,6 +1392,12 @@ namespace Rise {
         'jump to first slide'
       );
       reveal_helpstr[CommandIDs.riseLastSlide] = trans.__('jump to last slide');
+      reveal_helpstr[CommandIDs.riseNextSlide] = trans.__(
+        'next (same as Space)'
+      );
+      reveal_helpstr[CommandIDs.risePreviousSlide] = trans.__(
+        'previous (same as Shift Space)'
+      );
       reveal_helpstr[CommandIDs.riseToggleOverview] =
         trans.__('toggle overview');
       reveal_helpstr[CommandIDs.riseToggleAllButtons] =

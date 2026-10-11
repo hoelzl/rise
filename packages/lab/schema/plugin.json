@@ -147,6 +147,36 @@
       "command": "RISE:smart-exec",
       "keys": ["Alt Enter"],
       "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "RISE:nextSlide",
+      "keys": ["Ctrl Shift ArrowDown"],
+      "selector": ".lm-Widget.reveal .jp-Notebook:focus"
+    },
+    {
+      "command": "RISE:nextSlide",
+      "keys": ["Ctrl Shift ArrowDown"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-commandMode :focus"
+    },
+    {
+      "command": "RISE:nextSlide",
+      "keys": ["Ctrl Shift ArrowDown"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-editMode"
+    },
+    {
+      "command": "RISE:previousSlide",
+      "keys": ["Ctrl Shift ArrowUp"],
+      "selector": ".lm-Widget.reveal .jp-Notebook:focus"
+    },
+    {
+      "command": "RISE:previousSlide",
+      "keys": ["Ctrl Shift ArrowUp"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-commandMode :focus"
+    },
+    {
+      "command": "RISE:previousSlide",
+      "keys": ["Ctrl Shift ArrowUp"],
+      "selector": ".lm-Widget.reveal .jp-Notebook.jp-mod-editMode"
     }
   ],
   "type": "object",
